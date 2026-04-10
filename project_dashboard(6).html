@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Project Dashboard — Confidential</title>
+<style>
+/* ── 100% Offline: ใช้ system font ที่มีในทุก OS ── */
+/* Windows: Tahoma / Leelawadee UI / Microsoft Sans Serif  */
+/* macOS/iOS: -apple-system / Thonburi                     */
+/* Android: Noto Sans Thai                                  */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font: 'Leelawadee UI','Leelawadee','Thonburi','Noto Sans Thai','Tahoma','Microsoft Sans Serif',sans-serif;
+  --bg:#f5f5f2;--surface:#fff;--surface2:#efede8;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --text:#18180f;--text2:#65655e;--text3:#9e9e96;
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding:1.5rem 1rem 3rem}
+.wrap{max-width:980px;margin:0 auto}
+
+.conf{background:#FCEBEB;border:1px solid #F09595;border-radius:var(--r-md);padding:8px 14px;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px}
+.conf-dot{width:16px;height:16px;border-radius:50%;background:#A32D2D;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.conf-dot::after{content:'!';color:#fff;font-size:10px;font-weight:700}
+.conf-txt{font-size:12px;color:#791F1F;font-weight:700;letter-spacing:.04em}
+.conf-sub{font-size:11px;color:#A32D2D;margin-left:auto;white-space:nowrap}
+
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.4rem}
+.hdr-title{font-size:20px;font-weight:700;color:var(--text)}
+.hdr-sub{font-size:13px;color:var(--text2);margin-top:2px}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.add-btn{background:var(--text);color:#fff;border:none;border-radius:var(--r-md);padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.add-btn:hover{opacity:.82}
+.clear-btn{background:transparent;border:1px solid #F09595;color:#A32D2D;border-radius:var(--r-md);padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
+.clear-btn:hover{background:#FCEBEB}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.4rem}
+.stat-card{background:var(--surface2);border-radius:var(--r-md);padding:13px 15px}
+.stat-lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-weight:600}
+.stat-val{font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+.nav-tabs{display:flex;gap:4px;margin-bottom:1.2rem;background:var(--surface2);border-radius:var(--r-lg);padding:5px;width:fit-content}
+.nav-tab{padding:7px 18px;border-radius:var(--r-md);border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);font-family:var(--font);transition:all .15s;white-space:nowrap}
+.nav-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.10)}
+
+.cust-tabs{display:flex;gap:8px;margin-bottom:1.1rem;flex-wrap:wrap}
+.cust-tab{padding:6px 16px;border-radius:100px;border:1px solid var(--border2);font-size:13px;cursor:pointer;background:transparent;color:var(--text2);font-family:var(--font);font-weight:600;transition:all .15s}
+.cust-tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+.cust-tab:hover:not(.active){background:var(--surface2)}
+
+.projects{display:flex;flex-direction:column;gap:10px}
+.empty{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px}
+
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.2rem;transition:border-color .15s}
+.pcard:hover{border-color:var(--border2)}
+.pcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:9px}
+.pcard-left{flex:1;min-width:0}
+.pcard-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.pcard-customer{font-size:12px;color:var(--text2);margin-bottom:6px}
+.pcard-customer span{font-weight:700;color:var(--text)}
+.owner-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.avatar{width:24px;height:24px;border-radius:50%;background:#EEEDFE;color:#3C3489;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.owner-name{font-size:13px;color:var(--text2)}
+.meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+.badge-jp{background:#EEEDFE;color:#3C3489}
+.badge-gl{background:#E6F1FB;color:#0C447C}
+.badge-lc{background:#EAF3DE;color:#27500A}
+.stag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.st-stability {background:#E6F1FB;color:#0C447C}
+.st-quv       {background:#FAEEDA;color:#633806}
+.st-newsample {background:#EEEDFE;color:#3C3489}
+.st-apptest   {background:#E1F5EE;color:#085041}
+.st-rddiscuss {background:#FAECE7;color:#712B13}
+.st-prepare   {background:#F1EFE8;color:#444441}
+.st-submit    {background:#EAF3DE;color:#27500A}
+.st-noprogress{background:#F4C0D1;color:#72243E}
+.card-date{font-size:12px;color:var(--text3)}
+.note-row{display:flex;align-items:flex-start;gap:7px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.note-lbl{font-size:11px;color:var(--text3);white-space:nowrap;padding-top:2px}
+.note-txt{font-size:13px;color:var(--text2);line-height:1.5}
+.card-btns{display:flex;gap:6px;flex-shrink:0}
+.cbtn{background:transparent;border:1px solid var(--border);border-radius:var(--r-md);padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--font);font-weight:600;transition:all .15s;white-space:nowrap}
+.cbtn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.cbtn.danger:hover{background:#FCEBEB;border-color:#F09595;color:#A32D2D}
+
+.status-overview{display:flex;flex-direction:column;gap:14px}
+.so-group{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.so-head{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.so-count{font-size:12px;color:var(--text2)}
+.so-empty{padding:14px 16px;font-size:13px;color:var(--text3)}
+.so-row{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.so-row:last-child{border-bottom:none}
+.so-avatar{width:28px;height:28px;border-radius:50%;background:#EEEDFE;color:#3C3489;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.so-info{flex:1;min-width:0}
+.so-pname{font-size:14px;font-weight:700;color:var(--text)}
+.so-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.so-cust-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:6px}
+.so-date{font-size:12px;color:var(--text3);white-space:nowrap;margin-top:2px}
+
+.owner-filter-row{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap}
+.owner-select{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--r-md);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none;min-width:220px}
+.owner-results{display:flex;flex-direction:column;gap:10px}
+.owner-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.owner-card-head{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.owner-big-avatar{width:38px;height:38px;border-radius:50%;background:#EEEDFE;color:#3C3489;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.owner-head-name{font-size:15px;font-weight:700;color:var(--text)}
+.owner-head-count{font-size:12px;color:var(--text2);margin-top:1px}
+.owner-proj-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.owner-proj-row:last-child{border-bottom:none}
+.owner-proj-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--border);padding:1.6rem;width:480px;max-width:94vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.12)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:1.2rem;color:var(--text)}
+.fg{margin-bottom:14px}
+.fl{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:600}
+.fi,.fse,.fta{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r-md);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none;transition:border-color .15s}
+.fi:focus,.fse:focus,.fta:focus{border-color:#888}
+.fta{height:78px;resize:none;line-height:1.5}
+.sub-field{display:none;align-items:center;gap:8px;margin-top:7px}
+.sub-field.show{display:flex}
+.sub-field label{font-size:12px;color:var(--text2);white-space:nowrap;font-weight:600}
+.sub-field input{width:80px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r-md);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none}
+.mfooter{display:flex;justify-content:flex-end;gap:8px;margin-top:1.4rem}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:var(--r-md);padding:8px 18px;font-size:13px;cursor:pointer;color:var(--text2);font-family:var(--font);font-weight:600}
+.btn-cancel:hover{background:var(--surface2)}
+.btn-save{background:var(--text);color:#fff;border:none;border-radius:var(--r-md);padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.btn-save:hover{opacity:.82}
+
+.confirm-box{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--border);padding:1.6rem;width:360px;max-width:94vw;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.confirm-box h3{font-size:16px;font-weight:700;margin-bottom:.5rem;color:var(--text)}
+.confirm-box p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.2rem}
+.confirm-footer{display:flex;justify-content:flex-end;gap:8px}
+.btn-confirm-del{background:#A32D2D;color:#fff;border:none;border-radius:var(--r-md);padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.btn-confirm-del:hover{background:#791F1F}
+
+.save-toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;border-radius:var(--r-md);padding:10px 18px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.save-toast.show{opacity:1}
+
+@media print{body{display:none!important}}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pcard-top{flex-wrap:wrap}
+  .card-btns{width:100%;justify-content:flex-end}
+  .nav-tabs{width:100%;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="conf">
+  <div class="conf-dot"></div>
+  <span class="conf-txt">CONFIDENTIAL — ห้ามเผยแพร่หรือแชร์ข้อมูลนี้โดยไม่ได้รับอนุญาต</span>
+  <span class="conf-sub">Internal Use Only</span>
+</div>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Project Dashboard</div>
+    <div class="hdr-sub" id="todayDate"></div>
+  </div>
+  <div class="hdr-right">
+    <button class="clear-btn" onclick="confirmClear()">ล้างข้อมูลทั้งหมด</button>
+    <button class="add-btn" onclick="openAddModal()">+ เพิ่ม Project</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="stat-lbl">ทั้งหมด</div><div class="stat-val" id="stTotal">0</div><div class="stat-sub">projects</div></div>
+  <div class="stat-card"><div class="stat-lbl">Japanese</div><div class="stat-val" id="stJP">0</div><div class="stat-sub">projects</div></div>
+  <div class="stat-card"><div class="stat-lbl">Global</div><div class="stat-val" id="stGL">0</div><div class="stat-sub">projects</div></div>
+  <div class="stat-card"><div class="stat-lbl">Local</div><div class="stat-val" id="stLC">0</div><div class="stat-sub">projects</div></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchNav('projects',this)">Projects</button>
+  <button class="nav-tab" onclick="switchNav('status',this)">Status Overview</button>
+  <button class="nav-tab" onclick="switchNav('owner',this)">ผู้รับผิดชอบ</button>
+</div>
+
+<div id="tab-projects">
+  <div class="cust-tabs">
+    <button class="cust-tab active" onclick="filterCust('all',this)">ทั้งหมด</button>
+    <button class="cust-tab" onclick="filterCust('Japanese',this)">Japanese</button>
+    <button class="cust-tab" onclick="filterCust('Global',this)">Global</button>
+    <button class="cust-tab" onclick="filterCust('Local',this)">Local</button>
+  </div>
+  <div class="projects" id="projectList"></div>
+</div>
+
+<div id="tab-status" style="display:none">
+  <div class="status-overview" id="statusOverview"></div>
+</div>
+
+<div id="tab-owner" style="display:none">
+  <div class="owner-filter-row">
+    <select class="owner-select" id="ownerSelect" onchange="renderOwnerTab()">
+      <option value="all">— แสดงทุกคน —</option>
+    </select>
+  </div>
+  <div class="owner-results" id="ownerResults"></div>
+</div>
+
+</div>
+
+<!-- Add Modal -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <h3>เพิ่ม Project ใหม่</h3>
+    <div class="fg"><label class="fl">ชื่อ Project</label><input class="fi" id="fName" placeholder="ชื่อ project..."/></div>
+    <div class="fg"><label class="fl">ชื่อลูกค้า</label><input class="fi" id="fCustomer" placeholder="ชื่อบริษัท / ลูกค้า..."/></div>
+    <div class="fg"><label class="fl">ผู้รับผิดชอบ</label><input class="fi" id="fOwner" placeholder="ชื่อผู้รับผิดชอบ..."/></div>
+    <div class="fg">
+      <label class="fl">ประเภทลูกค้า</label>
+      <select class="fse" id="fType">
+        <option value="Japanese">Japanese</option>
+        <option value="Global">Global</option>
+        <option value="Local">Local</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">สถานะ</label>
+      <select class="fse" id="fStatus" onchange="toggleMonth('fStatus','fMonthWrap')">
+        <option value="stability">Under testing — Stability test</option>
+        <option value="quv">Under testing — QUV</option>
+        <option value="newsample">Under consider new sample</option>
+        <option value="apptest">Under testing — Application test</option>
+        <option value="rddiscuss">Waiting discussion with R&D Manager</option>
+        <option value="prepare">During prepare new sample</option>
+        <option value="submit">Submit sample</option>
+        <option value="noprogress">No progress</option>
+      </select>
+      <div class="sub-field show" id="fMonthWrap">
+        <label>ระยะเวลา (เดือน)</label>
+        <input type="number" id="fMonth" min="1" max="120" placeholder="XX"/>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">วันที่อัพเดต</label><input class="fi" type="date" id="fDate"/></div>
+    <div class="fg"><label class="fl">Note อัพเดต</label><textarea class="fta" id="fNote" placeholder="รายละเอียดความคืบหน้า..."></textarea></div>
+    <div class="mfooter">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-save" onclick="saveProject()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Modal -->
+<div class="overlay" id="updModal">
+  <div class="modal">
+    <h3>อัพเดต Project</h3>
+    <div id="updContent"></div>
+    <div class="mfooter">
+      <button class="btn-cancel" onclick="closeUpdModal()">ปิด</button>
+      <button class="btn-save" onclick="saveUpdate()">บันทึกอัพเดต</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Clear -->
+<div class="overlay" id="confirmModal">
+  <div class="confirm-box">
+    <h3>ยืนยันการลบข้อมูล</h3>
+    <p>ต้องการลบ project ทั้งหมดออกจากระบบใช่หรือไม่?<br/>การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+    <div class="confirm-footer">
+      <button class="btn-cancel" onclick="closeConfirm()">ยกเลิก</button>
+      <button class="btn-confirm-del" onclick="doClear()">ลบทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-toast" id="toast"></div>
+
+<script>
+/* ── Security ── */
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&['p','s','u'].includes(e.key.toLowerCase()))e.preventDefault();
+});
+
+/* ── Date ── */
+const todayISO=new Date().toISOString().split('T')[0];
+document.getElementById('todayDate').textContent=
+  new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('fDate').value=todayISO;
+
+/* ── Status config ── */
+const ST={
+  stability :{label:m=>'Under testing — Stability test'+(m?' '+m+' month':''),cls:'st-stability'},
+  quv       :{label:()=>'Under testing — QUV',                                cls:'st-quv'},
+  newsample :{label:()=>'Under consider new sample',                          cls:'st-newsample'},
+  apptest   :{label:()=>'Under testing — Application test',                   cls:'st-apptest'},
+  rddiscuss :{label:()=>'Waiting discussion with R&D Manager',                cls:'st-rddiscuss'},
+  prepare   :{label:()=>'During prepare new sample',                          cls:'st-prepare'},
+  submit    :{label:()=>'Submit sample',                                      cls:'st-submit'},
+  noprogress:{label:()=>'No progress',                                        cls:'st-noprogress'},
+};
+const ST_ORDER=['stability','quv','newsample','apptest','rddiscuss','prepare','submit','noprogress'];
+const CCLS={Japanese:'badge-jp',Global:'badge-gl',Local:'badge-lc'};
+const STORAGE_KEY='proj_dashboard_v2';
+
+/* ── Persistence ── */
+function loadProjects(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw!==null){const d=JSON.parse(raw);if(Array.isArray(d))return d;}
+  }catch(e){}
+  return [];
+}
+function persist(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));}
+  catch(e){alert('ไม่สามารถบันทึกได้: '+e.message);}
+}
+function getNextId(){return projects.length?Math.max(...projects.map(p=>p.id))+1:1;}
+
+let projects=loadProjects();
+let custFilter='all',updatingId=null,currentNav='projects';
+
+/* ── Toast ── */
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg||'บันทึกแล้ว ✓';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ── Clear ── */
+function confirmClear(){document.getElementById('confirmModal').classList.add('open')}
+function closeConfirm(){document.getElementById('confirmModal').classList.remove('open')}
+function doClear(){
+  projects=[];persist();closeConfirm();renderAll();showToast('ลบข้อมูลทั้งหมดแล้ว');
+}
+
+/* ── Helpers ── */
+function initials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
+function fmtDate(d){return d?new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'-'}
+function stTag(p){const s=ST[p.status];return s?`<span class="stag ${s.cls}">${s.label(p.month||null)}</span>`:''}
+function toggleMonth(selId,wrapId){
+  document.getElementById(wrapId).classList.toggle('show',document.getElementById(selId).value==='stability');
+}
+
+/* ── Stats ── */
+function renderStats(){
+  document.getElementById('stTotal').textContent=projects.length;
+  document.getElementById('stJP').textContent=projects.filter(p=>p.type==='Japanese').length;
+  document.getElementById('stGL').textContent=projects.filter(p=>p.type==='Global').length;
+  document.getElementById('stLC').textContent=projects.filter(p=>p.type==='Local').length;
+}
+
+/* ── Project cards ── */
+function renderProjects(){
+  const list=document.getElementById('projectList');
+  const data=custFilter==='all'?projects:projects.filter(p=>p.type===custFilter);
+  if(!data.length){list.innerHTML='<div class="empty">ยังไม่มี project — กด "+ เพิ่ม Project" เพื่อเริ่มต้น</div>';return}
+  list.innerHTML=data.map(p=>`
+    <div class="pcard">
+      <div class="pcard-top">
+        <div class="pcard-left">
+          <div class="pcard-name">${p.name}</div>
+          <div class="pcard-customer">ลูกค้า: <span>${p.customer}</span></div>
+          <div class="owner-row">
+            <div class="avatar">${initials(p.owner)}</div>
+            <span class="owner-name">${p.owner}</span>
+          </div>
+          <div class="meta-row">
+            <span class="badge ${CCLS[p.type]}">${p.type}</span>
+            ${stTag(p)}
+            <span class="card-date">อัพเดต ${fmtDate(p.lastUpdate)}</span>
+          </div>
+        </div>
+        <div class="card-btns">
+          <button class="cbtn" onclick="openUpdModal(${p.id})">อัพเดต</button>
+          <button class="cbtn danger" onclick="deleteOne(${p.id})">ลบ</button>
+        </div>
+      </div>
+      ${p.note?`<div class="note-row"><span class="note-lbl">Note:</span><span class="note-txt">${p.note}</span></div>`:''}
+    </div>`).join('');
+}
+
+/* ── Status Overview ── */
+function renderStatusOverview(){
+  const el=document.getElementById('statusOverview');
+  el.innerHTML=ST_ORDER.map(key=>{
+    const s=ST[key];
+    const items=projects.filter(p=>p.status===key);
+    return`<div class="so-group">
+      <div class="so-head">
+        <span class="stag ${s.cls}">${s.label(null)}</span>
+        <span class="so-count">${items.length} project${items.length!==1?'s':''}</span>
+      </div>
+      ${!items.length
+        ?'<div class="so-empty">ไม่มี project ในสถานะนี้</div>'
+        :items.map(p=>`<div class="so-row">
+            <div class="so-avatar">${initials(p.owner)}</div>
+            <div class="so-info">
+              <div class="so-pname">${p.name}
+                <span class="so-cust-badge badge ${CCLS[p.type]}">${p.type}</span>
+              </div>
+              <div class="so-meta">ลูกค้า: ${p.customer} &nbsp;·&nbsp; ผู้รับผิดชอบ: ${p.owner}${p.status==='stability'&&p.month?' &nbsp;·&nbsp; '+p.month+' month':''}</div>
+            </div>
+            <div class="so-date">${fmtDate(p.lastUpdate)}</div>
+          </div>`).join('')
+      }
+    </div>`;
+  }).join('');
+}
+
+/* ── Owner tab ── */
+function getOwners(){return[...new Set(projects.map(p=>p.owner))].sort()}
+function populateOwnerSelect(){
+  const sel=document.getElementById('ownerSelect');
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">— แสดงทุกคน —</option>'+
+    getOwners().map(o=>`<option value="${o}"${o===cur?' selected':''}>${o}</option>`).join('');
+}
+function renderOwnerTab(){
+  const sel=document.getElementById('ownerSelect').value;
+  const owners=sel==='all'?getOwners():[sel];
+  const el=document.getElementById('ownerResults');
+  if(!owners.length){el.innerHTML='<div class="empty">ยังไม่มีข้อมูลผู้รับผิดชอบ</div>';return}
+  el.innerHTML=owners.map(owner=>{
+    const items=projects.filter(p=>p.owner===owner);
+    return`<div class="owner-card">
+      <div class="owner-card-head">
+        <div class="owner-big-avatar">${initials(owner)}</div>
+        <div>
+          <div class="owner-head-name">${owner}</div>
+          <div class="owner-head-count">รับผิดชอบ ${items.length} project${items.length!==1?'s':''}</div>
+        </div>
+      </div>
+      ${!items.length
+        ?'<div class="so-empty">ไม่มี project</div>'
+        :items.map(p=>`<div class="owner-proj-row">
+            <div style="flex:1;min-width:0">
+              <div class="owner-proj-name">${p.name}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;font-size:12px;color:var(--text2)">
+                <span>ลูกค้า: ${p.customer}</span>
+                <span class="badge ${CCLS[p.type]}">${p.type}</span>
+                ${stTag(p)}
+              </div>
+            </div>
+            <div class="so-date" style="margin-top:2px">${fmtDate(p.lastUpdate)}</div>
+          </div>`).join('')
+      }
+    </div>`;
+  }).join('');
+}
+
+/* ── Nav ── */
+function switchNav(tab,el){
+  currentNav=tab;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['projects','status','owner'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===tab?'block':'none';
+  });
+  if(tab==='status')renderStatusOverview();
+  if(tab==='owner'){populateOwnerSelect();renderOwnerTab();}
+}
+function filterCust(f,el){
+  custFilter=f;
+  document.querySelectorAll('.cust-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderProjects();
+}
+
+/* ── Add ── */
+function openAddModal(){
+  ['fName','fCustomer','fOwner','fNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fType').value='Japanese';
+  document.getElementById('fStatus').value='stability';
+  document.getElementById('fMonth').value='';
+  document.getElementById('fDate').value=todayISO;
+  document.getElementById('fMonthWrap').classList.add('show');
+  document.getElementById('addModal').classList.add('open');
+}
+function closeModal(){document.getElementById('addModal').classList.remove('open')}
+function saveProject(){
+  const name=document.getElementById('fName').value.trim();
+  const customer=document.getElementById('fCustomer').value.trim();
+  const owner=document.getElementById('fOwner').value.trim();
+  if(!name){alert('กรุณาใส่ชื่อ project');return}
+  if(!customer){alert('กรุณาใส่ชื่อลูกค้า');return}
+  if(!owner){alert('กรุณาใส่ชื่อผู้รับผิดชอบ');return}
+  const status=document.getElementById('fStatus').value;
+  projects.unshift({
+    id:getNextId(),name,customer,owner,
+    type:document.getElementById('fType').value,
+    status,
+    month:status==='stability'?parseInt(document.getElementById('fMonth').value)||null:null,
+    lastUpdate:document.getElementById('fDate').value||todayISO,
+    note:document.getElementById('fNote').value.trim()
+  });
+  persist();closeModal();renderAll();showToast('เพิ่ม project แล้ว ✓');
+}
+function deleteOne(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  if(!confirm(`ลบ "${p.name}" ?`))return;
+  projects=projects.filter(x=>x.id!==id);
+  persist();renderAll();showToast('ลบ project แล้ว');
+}
+
+/* ── Update ── */
+function openUpdModal(id){
+  updatingId=id;
+  const p=projects.find(x=>x.id===id);
+  const opts=Object.entries(ST).map(([v,s])=>
+    `<option value="${v}"${p.status===v?' selected':''}>${s.label(null)}</option>`).join('');
+  document.getElementById('updContent').innerHTML=`
+    <div class="fg">
+      <label class="fl">Project</label>
+      <div style="font-size:14px;font-weight:700;color:var(--text)">${p.name}</div>
+    </div>
+    <div class="fg"><label class="fl">ชื่อลูกค้า</label><input class="fi" id="uCustomer" value="${p.customer}"/></div>
+    <div class="fg"><label class="fl">ผู้รับผิดชอบ</label><input class="fi" id="uOwner" value="${p.owner}"/></div>
+    <div class="fg">
+      <label class="fl">สถานะ</label>
+      <select class="fse" id="uStatus" onchange="toggleMonth('uStatus','uMonthWrap')">${opts}</select>
+      <div class="sub-field ${p.status==='stability'?'show':''}" id="uMonthWrap">
+        <label>ระยะเวลา (เดือน)</label>
+        <input type="number" id="uMonth" min="1" max="120" placeholder="XX" value="${p.month||''}"/>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">วันที่อัพเดต</label><input class="fi" type="date" id="uDate" value="${p.lastUpdate||todayISO}"/></div>
+    <div class="fg"><label class="fl">Note อัพเดต</label><textarea class="fta" id="uNote">${p.note||''}</textarea></div>`;
+  document.getElementById('updModal').classList.add('open');
+}
+function closeUpdModal(){document.getElementById('updModal').classList.remove('open')}
+function saveUpdate(){
+  const p=projects.find(x=>x.id===updatingId);if(!p)return;
+  p.customer=document.getElementById('uCustomer').value.trim()||p.customer;
+  p.owner=document.getElementById('uOwner').value.trim()||p.owner;
+  p.status=document.getElementById('uStatus').value;
+  p.month=p.status==='stability'?parseInt(document.getElementById('uMonth').value)||null:null;
+  p.lastUpdate=document.getElementById('uDate').value||todayISO;
+  p.note=document.getElementById('uNote').value.trim();
+  persist();closeUpdModal();renderAll();showToast('อัพเดตแล้ว ✓');
+}
+
+/* ── Init ── */
+function renderAll(){
+  renderStats();renderProjects();
+  if(currentNav==='status')renderStatusOverview();
+  if(currentNav==='owner'){populateOwnerSelect();renderOwnerTab();}
+}
+renderAll();
+</script>
+</body>
+</html>
